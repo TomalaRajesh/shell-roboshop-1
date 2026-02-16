@@ -34,13 +34,13 @@ VALIDATE(){
 }
 
 dnf module disable nodejs -y &>>$LOG_FILE
-VALIDATE $? "Disabiling default nodejs"
+VALIDATE $? "Disabling default nodejs"
 
 dnf module enable nodejs:20 -y &>>$LOG_FILE
 VALIDATE $? "Enabling nodejs:20"
 
 dnf install nodejs -y &>>$LOG_FILE
-VALIDATE $? "Installing Nodejs:20"
+VALIDATE $? "Installing nodejs:20"
 
 id roboshop
 if [ $? -ne 0 ]
@@ -50,7 +50,7 @@ then
 else
     echo -e "System user roboshop already created ... $Y SKIPPING $N"
 fi
-    
+
 mkdir -p /app 
 VALIDATE $? "Creating app directory"
 
@@ -77,5 +77,11 @@ cp $SCRIPT_DIR/mongo.repo /etc/yum.repos.d/mongo.repo
 dnf install mongodb-mongosh -y &>>$LOG_FILE
 VALIDATE $? "Installing MongoDB Client"
 
-mongosh --host mongodb.rajdevops.fun </app/db/master-data.js &>>$LOG_FILE
-VALIDATE $? "Loading data into MongoDB"
+STATUS=$(mongosh --host mongodb.rajdevops.fun --eval 'db.getMongo().getDBNames().indexOf("catalogue")')
+if [ $STATUS -lt 0 ]
+then
+    mongosh --host mongodb.rajdevops.fun </app/db/master-data.js &>>$LOG_FILE
+    VALIDATE $? "Loading data into MongoDB"
+else
+    echo -e "Data is already loaded ... $Y SKIPPING $N"
+fi
