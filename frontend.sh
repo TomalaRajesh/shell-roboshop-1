@@ -33,11 +33,36 @@ VALIDATE(){
     fi
 }
 
-dnf module disable nginx -y $LOGS_FOLDER
+dnf module disable nginx -y &>>$LOGS_FILE
 VALIDATE $? "Disabiling default Nginx"
 
-dnf module enable nginx:1.24 -y $LOGS_FOLDER
+dnf module enable nginx:1.24 -y &>>$LOGS_FILE
 VALIDATE $? "Enabiling Nginx:1.24"
 
-dnf install nginx -y $LOGS_FOLDER
+dnf install nginx -y &>>$LOGS_FILE
 VALIDATE "Installing nginx Server"
+
+systemctl enable nginx &>>$LOGS_FILE
+systemctl start nginx
+VALIDATE $? "Starting Nginx"
+
+rm -rf /usr/share/nginx/html/* &>>$LOGS_FILE
+VALIDATE $? "Removing default content"
+
+curl -o /tmp/frontend.zip https://roboshop-artifacts.s3.amazonaws.com/frontend-v3.zip &>>$LOGS_FILE
+VALIDATE $? "Downloading frontend"
+
+cd /usr/share/nginx/html 
+unzip /tmp/frontend.zip &>>$LOGS_FILE
+VALIDATE $? "unzipping frontend"
+
+rm -rf /etc/nginx/nginx.conf &>>$LOGS_FILE
+VALIDATE $? "Remove default nginx conf"
+
+cp $SCRIPT_DIR/nginx.conf /etc/nginx/nginx.conf
+VALIDATE $? "Copying nginx.conf"
+
+systemctl restart nginx
+VALIDATE $? "Restarting Nginx"
+
+
