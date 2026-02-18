@@ -33,30 +33,30 @@ VALIDATE(){
     fi
 }
 
-dnf module disable nginx -y &>>$LOGS_FILE
+dnf module disable nginx -y &>>$LOG_FILE
 VALIDATE $? "Disabiling default Nginx"
 
-dnf module enable nginx:1.24 -y &>>$LOGS_FILE
+dnf module enable nginx:1.24 -y &>>$LOG_FILE
 VALIDATE $? "Enabiling Nginx:1.24"
 
-dnf install nginx -y &>>$LOGS_FILE
+dnf install nginx -y &>>$LOG_FILE
 VALIDATE "Installing nginx Server"
 
-systemctl enable nginx &>>$LOGS_FILE
+systemctl enable nginx &>>$LOG_FILE
 systemctl start nginx
 VALIDATE $? "Starting Nginx"
 
-rm -rf /usr/share/nginx/html/* &>>$LOGS_FILE
+rm -rf /usr/share/nginx/html/* &>>$LOG_FILE
 VALIDATE $? "Removing default content"
 
-curl -o /tmp/frontend.zip https://roboshop-artifacts.s3.amazonaws.com/frontend-v3.zip &>>$LOGS_FILE
+curl -o /tmp/frontend.zip https://roboshop-artifacts.s3.amazonaws.com/frontend-v3.zip &>>$LOG_FILE
 VALIDATE $? "Downloading frontend"
 
 cd /usr/share/nginx/html 
-unzip /tmp/frontend.zip &>>$LOGS_FILE
+unzip /tmp/frontend.zip &>>$LOG_FILE
 VALIDATE $? "unzipping frontend"
 
-rm -rf /etc/nginx/nginx.conf &>>$LOGS_FILE
+rm -rf /etc/nginx/nginx.conf &>>$LOG_FILE
 VALIDATE $? "Remove default nginx conf"
 
 cp $SCRIPT_DIR/nginx.conf /etc/nginx/nginx.conf
