@@ -80,9 +80,16 @@ VALIDATE $? "Starting Shipping"
 dnf install mysql -y  &>>$LOG_FILE
 VALIDATE $? "Installing MYSQL"
 
-mysql -h mysql.rajdevops.fun -uroot -p$MYSQL_ROOT_PASSWORD < /app/db/schema.sql &>>$LOG_FILE
-mysql -h mysql.rajdevops.fun -uroot -p$MYSQL_ROOT_PASSWORD < /app/db/app-user.sql &>>$LOG_FILE
-mysql -h mysql.rajdevops.fun -uroot -p$MYSQL_ROOT_PASSWORD < /app/db/master-data.sql &>>$LOG_FILE
+mysql -h mysql.rajdevops.fun -u root -pRoboShop@1 -e 'use cities'
+if [ $? -ne 0 ]
+then
+    mysql -h mysql.rajdevops.fun -uroot -p$MYSQL_ROOT_PASSWORD < /app/db/schema.sql &>>$LOG_FILE
+    mysql -h mysql.rajdevops.fun -uroot -p$MYSQL_ROOT_PASSWORD < /app/db/app-user.sql &>>$LOG_FILE
+    mysql -h mysql.rajdevops.fun -uroot -p$MYSQL_ROOT_PASSWORD < /app/db/master-data.sql &>>$LOG_FILE
+    VALIDATE $? "Loading data into MYSQL"
+else
+    echo -e "Data is already into MYSQL... $Y SKIPPING $N"
+fi
 
 systemctl restart shipping &>>$LOG_FILE
 VALIDATE $? "Restart Shipping"
